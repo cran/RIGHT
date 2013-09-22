@@ -356,7 +356,7 @@ var Box = {};
 			this.graphId = axisObj.numberOfGraph;
 			this.radius = (optionObj.radius == undefined) ? (2) : (optionObj.radius); // default radius is 2
 			// set the base color.
-			if(optionObj.baseColor != undefined){
+			if(optionObj.baseColor != undefined && optionObj.baseColor != 'n'){
 				this.baseColor = optionObj.baseColor;
 			}else{
 				this.baseColor = 'green';
@@ -378,7 +378,7 @@ var Box = {};
 			this.node = new Array();
 			var cnt = 0;
 			for(var i = 0 ; i < median.length ; i ++){
-				if(!(x[i] == -1 || y[i] == -1)){
+				if(!(y[i] == -1)){
 					if(isOutlier[i] == false){
 						var IQR = q1[i] - q3[i];
 						var upFence = upperFence[i];
@@ -386,7 +386,7 @@ var Box = {};
 						var med = median[i];
 						this.node[cnt] =  new Kinetic.BoxWhisker({
 							name: i,
-							x: (axisObj.isXDiscrete == true) ?  x[i] : axisObj._getPixelX((axisObj.xMax - axisObj.xMin)/2),
+							x: (axisObj.isXDiscrete == true) ?  x[i] : axisObj._getPixelX((axisObj.xMax + axisObj.xMin)/2),
 							y:  y[i],
 							strokeWidth: 2,
 							width: width,
@@ -441,7 +441,7 @@ var Box = {};
         	axisObj.graphObjArr[this.graphId] = this;
         	axisObj.dataLayerArr[this.graphId] = this.dataLayer;
 			axisObj.hoverArr[this.graphId] = boxHover();
-			axisObj.boxSearchArr[this.graphId] = dotBoxSearch(this);
+			axisObj.boxSearchArr[this.graphId] = boxBoxSearch(this);
 			//add layer
 			axisObj.stage.add(this.dataLayer);
 		},
@@ -465,9 +465,8 @@ var Box = {};
             Kinetic.Shape.call(this, config);
             this.className = 'BoxWhisker';
         },
-        drawFunc: function(canvas) {
-            var context = canvas.getContext(),
-                width = this.getWidth(),
+        drawFunc: function(context) {
+            var width = this.getWidth(),
                 height = this.getHeight(),
                 upFence = this.getUpFence(),
                 loFence = this.getLoFence(),
@@ -481,7 +480,7 @@ var Box = {};
             context.moveTo(0, med);	// (0, relative median)
             context.lineTo(width, med); // (width, relative median)
             context.closePath();
-            canvas.fillStroke(this);
+            context.fillStrokeShape(this);
         }
     };
     Kinetic.Util.extend(Kinetic.BoxWhisker, Kinetic.Shape);    
@@ -493,6 +492,34 @@ var Box = {};
 })();
 
 /////////////////////////////////////////update function //////////////////////////////
+function boxBoxSearch(graphObj)
+{
+	return function(smallX, smallY, bigX, bigY)
+		{
+			var tmpNodeArr = new Array();
+			var tmpNodeArr1 = new Array();
+			if(ctrlPressed == true) {
+				for(var i = 0 ; i < graphObj.node.length ; i ++){
+					if(smallX <= graphObj.node[i].getX() && graphObj.node[i].getX() <= bigX && smallY <= graphObj.node[i].getY() && graphObj.node[i].getY() <= bigY){
+						if(graphObj.node[i].getSelected()==1){
+							tmpNodeArr.push(graphObj.node[i].getName());
+						}else{
+							tmpNodeArr1.push(graphObj.node[i].getName());
+						}					                   
+	                }
+				}
+				allGraphUpdate(graphObj, tmpNodeArr, 0);
+				allGraphUpdate(graphObj, tmpNodeArr1, 1);
+			}else{
+				for(var i = 0 ; i < graphObj.node.length ; i ++){
+					if(smallX <= graphObj.node[i].getX() && graphObj.node[i].getX() <= bigX && smallY <= graphObj.node[i].getY() && graphObj.node[i].getY() <= bigY){
+						tmpNodeArr.push(graphObj.node[i].getName());              
+	                }                        
+				}
+				allGraphUpdate(graphObj, tmpNodeArr, 1);
+			}
+		};
+}
 //Kinetic version update
 //just remove transitient, and change it with "set" syntax.
 //"set" syntax has not changed during many versions.

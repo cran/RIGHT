@@ -4,16 +4,17 @@
 #' 
 #' @param form a formula describing the x and y variables as y ~ x.
 #' @param data a data.frame object.
+#' @param col color of the boxes. 
+#'
+#' @seealso \code{\link{lines}} 
 #' 
 #' @export
 #' 
 #' @examples
-#' obj <- RIGHT({plot(conc ~ Time, Theoph, type = "n") # create blank axis
-#'               lines(conc ~ Time, Theoph)}, Theoph)
+#' \donttest{obj <- RIGHT({plot(conc ~ Time, Theoph, type = "n") # create blank axis
+#'               lines(conc ~ Time, Theoph)}, Theoph)}
 #' \donttest{print(obj)}
-#' \dontshow{cleanup(obj)}
-
-lines_RIGHT <- function(form, data) {
+lines_RIGHT <- function(form, data, col = NULL) {
   
   ## ---
   ## Check input arguments:
@@ -45,11 +46,11 @@ lines_RIGHT <- function(form, data) {
   axisName <- checkFormula_xy(form)
   checkAxisName(axisName$x, dataArray)
   checkAxisName(axisName$y, dataArray)
-  
+
   ## ---
   ## Plot points:
   ## ---
-  
+
   # Increment the number of points:
   .RIGHT$numLines <- .RIGHT$numLines + 1
   
@@ -61,7 +62,8 @@ lines_RIGHT <- function(form, data) {
                                  paste0("var line", .RIGHT$numLines,
                                         " = new Line(axis", .RIGHT$numAxis,
                                         ", lineObj", .RIGHT$numLines,
-                                        ", 'x1', 'x2', 'y1', 'y2', {});")))
+                                        ", 'x1', 'x2', 'y1', 'y2', ",
+                                        createObject(baseColor = col, alwaysObject = TRUE), ");")))
   
   # Source dot.js in head:
   addSource(file.path(.RIGHT$libDir_RIGHT, "line.js"))

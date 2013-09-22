@@ -5,12 +5,12 @@
 #' @param x variable name for which the histogram is desired.
 #' @param data a data.frame object.
 #' 
+#' @seealso \code{\link{hist}}
 #' @export
 #' 
 #' @examples
-#' obj <- RIGHT(hist(Subject, Theoph), Theoph)
+#' \donttest{obj <- RIGHT(hist(Subject, Theoph), Theoph)}
 #' \donttest{print(obj)}
-#' \dontshow{cleanup(obj)}
 hist_RIGHT <- function(x, data) {
   
   ## ---

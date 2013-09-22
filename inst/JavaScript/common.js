@@ -2,24 +2,40 @@ var plotWidth = 300;  //default value for plot width
 var plotHeight = 300; //default value for plot height  
 var plotRadius = 2;
 
+function findSubSet(dataObj, labelArr, subSet)
+{
+	for(var i = 0 ; i < labelArr.length ; i ++){
+		if(dataObj[labelArr[i]].isDiscrete == undefined){
+			var searchStr = new RegExp(labelArr[i], 'g'); // "g" means all search
+    		subSet = subSet.replace(searchStr, "dataObj." + labelArr[i] + "[i]");
+		}else{
+			var searchStr = new RegExp(labelArr[i], 'g'); // "g" means all search
+    		subSet = subSet.replace(searchStr, "dataObj." + labelArr[i] + ".#[dataObj." + labelArr[i] + "[i]]");
+		}
+	}
+	var searchStr = new RegExp('#', 'g');
+	subSet = subSet.replace(searchStr, "index");
+	
+	return subSet;
+}
+
 function getNodeinfo(dataObj, id)
 {
 	var cnt = 0;
+	var info ='';
 	for(var name in dataObj){
-		if(cnt == 0){
-			if(!(name == 'optionObj' || name == '_reCalculate' || name == 'labels' || name == 'parent' || name == 'child' || name == 'refreshTable' || name == 'labelArr' || name == '_type' || name == 'refreshArr' || name == '$id' || name == '$isSelected' || name == '$isHidden' || name == 'parentTOchild' || name == 'childTOparent' || name == 'updateArr' || name == 'refreshArr')){
-				if(dataObj[name].isDiscrete == true){
-					var info =  name + ': ' + dataObj[name].index[dataObj[name][id]];
+		if(!(name == '$dataNumArr' || name == '$ans' || name == 'optionObj' || name == '_reCalculate' || name == 'labels' || name == 'parent' || name == 'child' || name == 'refreshTable' || name == 'labelArr' || name == '_type' || name == 'refreshArr' || name == '$id' || name == '$isSelected' || name == '$isHidden' || name == 'parentTOchild' || name == 'childTOparent' || name == 'updateArr' || name == 'refreshArr')){
+			if(dataObj[name].isDiscrete == true){
+				if(cnt == 0){
+					info = name + ': ' + dataObj[name].index[dataObj[name][id]];
+					cnt ++;
 				}else{
-					var info =  name + ': ' + dataObj[name][id];
-				}
-			}
-				
-			cnt ++;
-		}else{
-			if(!(name == 'optionObj' || name == '_reCalculate' || name == 'labels' || name == 'parent' || name == 'child' || name == 'refreshTable' || name == 'labelArr' || name == '_type' || name == 'refreshArr' || name == '$id' || name == '$isSelected' || name == '$isHidden' || name == 'parentTOchild' || name == 'childTOparent' || name == 'updateArr' || name == 'refreshArr')){
-				if(dataObj[name].isDiscrete == true){
 					info = info + "\r\n" + name + ': ' + dataObj[name].index[dataObj[name][id]];
+				}					
+			}else{
+				if(cnt == 0){
+					info = name + ': ' + dataObj[name][id];
+					cnt ++;
 				}else{
 					info = info + "\r\n" + name + ': ' + dataObj[name][id];
 				}
@@ -33,7 +49,7 @@ function getFields(dataObj)
 {
 	var temp = new Array();
 	for(var name in dataObj){
-		if(!(name == 'optionObj' || name == '_reCalculate' || name == 'labels' || name == 'parent' || name == 'child' || name == 'refreshTable' || name == 'labelArr' || name == '_type' || name == 'refreshArr' || name == '$id' || name == '$isSelected' || name == '$isHidden' || name == 'parentTOchild' || name == 'childTOparent' || name == 'updateArr' || name == 'refreshArr')){
+		if(!(name == '$dataNumArr' || name == '$ans' || name == 'optionObj' || name == '_reCalculate' || name == 'labels' || name == 'parent' || name == 'child' || name == 'refreshTable' || name == 'labelArr' || name == '_type' || name == 'refreshArr' || name == '$id' || name == '$isSelected' || name == '$isHidden' || name == 'parentTOchild' || name == 'childTOparent' || name == 'updateArr' || name == 'refreshArr')){
 			temp.push(name);
 		}
 	}

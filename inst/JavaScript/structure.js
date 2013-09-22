@@ -97,7 +97,7 @@ function createMainStructure(fileName)
 	mainArr.parent = null;
 	mainArr.child = null;
 	mainArr.$isSelected = isSelected;
-	mainArr.$isHidden = new Array(isSelected.length);
+	mainArr.$ans = "undefined";
 	for(var i = 0 ; i < mainArr.$isHidden ; i ++){
 		mainArr.$isHidden[i] = false;
 	}
@@ -122,6 +122,14 @@ function createMainStructure(fileName)
 			delete mainArr[labelArr[i]].isDiscrete;
 		}
 	}
+	// for hidden function.
+	mainArr.$dataNumArr = new Array();
+	mainArr.$isHidden = new Array();
+	for(var i = 0 ; i < mainArr[labelArr[0]].length ; i ++){
+		mainArr.$dataNumArr[i] = i;
+		mainArr.$isHidden[i] = false;
+	}
+
 	return mainArr;
 }
 function createOffloadStructure()

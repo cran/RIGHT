@@ -4,15 +4,17 @@
 #' 
 #' @param form a formula describing the x and y variables as y ~ x.
 #' @param data a data.frame object.
+#' @param col color of the points. 
+#' 
+#' @seealso \code{\link{points}}
 #' 
 #' @export
 #' 
 #' @examples
-#' obj <- RIGHT({plot(conc ~ Time, Theoph, type = "n") # create blank axis
-#'               points(conc ~ Time, Theoph)}, Theoph)
+#' \donttest{obj <- RIGHT({plot(conc ~ Time, Theoph, type = "n") # create blank axis
+#'               points(conc ~ Time, Theoph)}, Theoph)}
 #' \donttest{print(obj)}
-#' \dontshow{cleanup(obj)}
-points_RIGHT <- function(form, data) {
+points_RIGHT <- function(form, data, col = NULL) {
   
   ## ---
   ## Check input arguments:
@@ -55,7 +57,8 @@ points_RIGHT <- function(form, data) {
                                paste0("var point", .RIGHT$numPoints,
                                       " = new Dot(axis", .RIGHT$numAxis,
                                       ", ", dataName,
-                                      ", '", axisName$x, "', '", axisName$y, "', {});"))
+                                      ", '", axisName$x, "', '", axisName$y, "', ",
+                                      createObject(baseColor = col, alwaysObject = TRUE) ,");"))
   
   # Source dot.js in head:
   addSource(file.path(.RIGHT$libDir_RIGHT, "dot.js"))

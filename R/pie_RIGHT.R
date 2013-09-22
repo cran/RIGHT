@@ -5,12 +5,13 @@
 #' @param x variable name for which the histogram is desired.
 #' @param data a data.frame object.
 #'
+#' @seealso \code{\link{pie}}
+#' 
 #' @export
 #' 
 #' @examples
-#' obj <- RIGHT(pie(Subject, Theoph), Theoph)
+#' \donttest{obj <- RIGHT(pie(Subject, Theoph), Theoph)}
 #' \donttest{print(obj)}
-#' \dontshow{cleanup(obj)}
 pie_RIGHT <- function(x, data) {
   
   ## ---

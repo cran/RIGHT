@@ -1,6 +1,6 @@
 var MakeLineObj = {};
 (function() {
-	MakeLineObj = function(dataObj, xLabel, yLabel) {
+	MakeLineObj = function(dataObj, xLabel, yLabel, optionObj) {
 		var temp = getFields(dataObj);
 		this.xLabel = xLabel;
 		this.yLabel = yLabel;
@@ -96,7 +96,7 @@ var Line = {};
 				this.dataId = dataObj.$id;
 				this.graphId = axisObj.numberOfGraph;
 				// set the base color.
-				if(optionObj.baseColor != undefined){
+				if(optionObj.baseColor != undefined && optionObj.baseColor != 'n'){
 					this.baseColor = optionObj.baseColor;
 				}else{
 					this.baseColor = 'black';
@@ -211,6 +211,9 @@ function lineUpdate(node)
 				}
 			}else if(selectOn == 1){	//select
 				node.setSelectCnt(node.getSelectCnt() + 1);
+				if(node.getSelectCnt() > 2){
+					node.setSelectCnt(2);
+				}
 				if(node.getSelected() == 0){
 					node.setStroke('red');
 					node.setOpacity(1);

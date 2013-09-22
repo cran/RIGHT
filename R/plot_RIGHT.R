@@ -7,15 +7,16 @@
 #' @param form a formula describing the x and y variables as y ~ x.
 #' @param data a data.frame object.
 #' @param type the type of plot. Currently, only "n", "b", "p", "l" are supported. See \code{\link{plot}} for more details.
-#'
+#' @param col color of the visual elements. 
+#' 
+#' @seealso \code{\link{plot}}
+#' 
 #' @export
 #' 
 #' @examples
-#' obj <- RIGHT(plot(conc ~ Time, Theoph, type = "b"), Theoph)
+#' \donttest{obj <- RIGHT(plot(conc ~ Time, Theoph, type = "b"), Theoph)}
 #' \donttest{print(obj)}
-#' \dontshow{cleanup(obj)}
-
-plot_RIGHT <- function(form, data, type = "b") {
+plot_RIGHT <- function(form, data, type = "b", col = NULL) {
   
   ## ---
   ## Check input arguments:
@@ -66,7 +67,7 @@ plot_RIGHT <- function(form, data, type = "b") {
 
   # CHECK (junghoon): refine this to support type == "c" as well.
   if (type == "l" || type == "b") {
-    lines_RIGHT(form, char(dataName))
+    lines_RIGHT(form, char(dataName), col = col)
   } # if
   
   ## ---
@@ -74,7 +75,7 @@ plot_RIGHT <- function(form, data, type = "b") {
   ## ---
   
   if (type == "p" || type == "b") {
-    points_RIGHT(form, char(dataName))
+    points_RIGHT(form, char(dataName), col = col)
   } # if
   
   invisible()
