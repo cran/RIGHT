@@ -4,17 +4,34 @@
 #' 
 #' @param form a formula describing the x and y variables as y ~ x.
 #' @param data a data.frame object.
-#' @param col color of the boxes. 
+#' @param isString a character is expected for \code{data} if \code{TRUE}. It is useful for programming.
 #'
 #' @seealso \code{\link{lines}} 
 #' 
 #' @export
 #' 
 #' @examples
-#' \donttest{obj <- RIGHT({plot(conc ~ Time, Theoph, type = "n") # create blank axis
-#'               lines(conc ~ Time, Theoph)}, Theoph)}
-#' \donttest{print(obj)}
-lines_RIGHT <- function(form, data, col = NULL) {
+#' \donttest{
+#' obj <- RIGHT({plot(conc ~ Time, Theoph, type = "n") # create blank axis
+#'               lines(conc ~ Time, Theoph)})
+#' print(obj)
+#' }
+lines_RIGHT <- function(form, data, isString = FALSE) {
+  
+  col <- NULL # TEMPORARY
+  
+  ## ---
+  ## Take strings if asked:
+  ## ---
+  
+  # Make sure that data exists:
+  argArray <- as.list(match.call())
+  
+  if (!isString) {
+    
+    data <- if (is.null(argArray$data)) NULL else as.character(argArray$data)
+    
+  } # if
   
   ## ---
   ## Check input arguments:
@@ -27,29 +44,28 @@ lines_RIGHT <- function(form, data, col = NULL) {
     stop("plot_RIGHT has not been called yet.")
   } # if
   
-  # Make sure that data exists:
-  argArray <- as.list(match.call())
-  
-  dataAttr <- attr(data, "char")
-  if (!is.null(dataAttr) && dataAttr == TRUE) {
-    dataName <- data
-  } else {
-    dataName <- as.character(argArray$data) 
-  } # if
-  checkDataName(dataName)
-  
   # get is necessary in case a character string is given for data:
-  dataArray <- get(dataName, envir = parent.frame())
+  if (!exists(data, envir = parent.frame())) {
+    stop(data, " does not exist.")
+  } # if
+  dataArray <- get(data, envir = parent.frame(), inherits = TRUE)
   
   # Check whether the columns exist:
   # CHECK (junghoon): is there a way to check whether form is a formula?
   axisName <- checkFormula_xy(form)
-  checkAxisName(axisName$x, dataArray)
-  checkAxisName(axisName$y, dataArray)
+  checkColumnName(axisName$x, dataArray)
+  checkColumnName(axisName$y, dataArray)
 
+  # Check col option:
+  checkCol(col)
+  col <- getRGB(col)
+  
   ## ---
   ## Plot points:
   ## ---
+
+  # Keep name of the data object:
+  .RIGHT$nameArray <- append(.RIGHT$nameArray, data)
 
   # Increment the number of points:
   .RIGHT$numLines <- .RIGHT$numLines + 1
@@ -57,7 +73,7 @@ lines_RIGHT <- function(form, data, col = NULL) {
   # Add script in body:
   .RIGHT$scriptArray <- append(.RIGHT$scriptArray,
                                c(paste0("var lineObj", .RIGHT$numLines,
-                                        " = new MakeLineObj(", dataName, 
+                                        " = new MakeLineObj(", data, 
                                         ", '", axisName$x, "', '", axisName$y, "');"),
                                  paste0("var line", .RIGHT$numLines,
                                         " = new Line(axis", .RIGHT$numAxis,

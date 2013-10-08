@@ -10,7 +10,9 @@
 \arguments{
   \item{expr}{plotting expression to evaluate}
 
-  \item{...}{data.frame objects used in \code{expr}.}
+  \item{...}{data.frame objects used in \code{expr}. If
+  they are used in one of the plotting functions, it is not
+  necessary to list them.}
 
   \item{title}{title of the visualization. The default
   value is "RIGHT: R Interactive Graphics via HTml."}
@@ -34,19 +36,22 @@
 library(ggplot2)
 
 set.seed(123456)
-subArray <- diamonds[sample(1:nrow(diamonds), 1000, TRUE), ]
 
+subArray <- diamonds[sample(1:nrow(diamonds), 1000, TRUE), ]
 fitObj <- loess(price ~ carat, subArray)
 xRange <- range(subArray$carat)
 fitArray <- data.frame(carat = seq(xRange[1], xRange[2], length.out = 100))
 fitArray$price <- predict(fitObj, newdata = fitArray)
 
-\donttest{obj <- RIGHT({plot(price ~ carat, subArray, type = "p")
-                        lines(price ~ carat, fitArray)
-                        hist(color, subArray)
-                        boxplot(price ~ color, subArray)
-                        pie(cut, subArray)},
-                       subArray, fitArray)}
-\donttest{print(obj)}
+\donttest{
+obj <- RIGHT({plot(price ~ carat, subArray, type = "p", color = "color")
+              lines(price ~ carat, fitArray)
+              hist(color, subArray, color = "cut")
+              boxplot(price ~ color, subArray)
+              pie(cut, subArray)
+              search(subArray)
+              table(subArray)})
+print(obj)
+}
 }
 
