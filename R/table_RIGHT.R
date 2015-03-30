@@ -8,11 +8,9 @@
 #' 
 #' @export
 #' 
-#' @examples
-#' \donttest{
-#' obj <- RIGHT({plot(conc ~ Time, Theoph, type = "p", color = Subject)
-#'               table(Theoph)})
-#' print(obj)
+#' @examples \dontrun{
+#' RIGHT({plot(conc ~ Time, Theoph, type = "p", color = Subject)
+#'        table(Theoph)})
 #' }
 table_RIGHT <- function(data, height = 200L, isString = FALSE) {
   
@@ -38,7 +36,6 @@ table_RIGHT <- function(data, height = 200L, isString = FALSE) {
     stop(data, " does not exist.")
   } # if
   
-  # CHECK (junghoon): is there a better way?
   if (!is.numeric(height) || (is.numeric(height) && height != as.integer(height)) || length(height) != 1) {
     stop("height should be an integer.")
   } # if
@@ -54,15 +51,13 @@ table_RIGHT <- function(data, height = 200L, isString = FALSE) {
   .RIGHT$numTable <- .RIGHT$numTable + 1
   
   # Add script in body: 
-  # CHECK (junghoon): this has to be improved such that the layout is controlled in <div> and the
-  #                   actual JavaScript code appears in <script>.
   .RIGHT$scriptArray <- append(.RIGHT$scriptArray, 
                             paste0('makeTable("table', .RIGHT$numTable,
                                    '", ', data,
                                    ', ', height, ');'))
   
   # Source dot.js in head:
-  addSource(file.path(.RIGHT$libDir_RIGHT, "table.js"))
+  addSource("table.js")
   
   invisible()
   

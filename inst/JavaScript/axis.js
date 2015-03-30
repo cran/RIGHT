@@ -1,4 +1,14 @@
-/**  Axis draws an axis  **/
+
+/**
+ * @fileOverview decide axis informaion using data object's informaion
+ */
+
+/**  
+ * @description draws an axis  
+ * 
+ * @constructor  
+ *  
+ */
 var Axis = {};
 
 (function() {
@@ -9,54 +19,53 @@ var Axis = {};
 		this._build(dataObj, xLabel, yLabel, optionObj);
 		this._draw();
 	};
-	
+	/**
+      @lends Axis.prototype
+    */
 	Axis.prototype = {
-			
+			/** @constructs */
 			_init: function(containerId, dataObj, xLabel, yLabel, optionObj) {
-				this.numberOfGraph = 0;
 				this.containerId = containerId;
 				this.dataObj = dataObj;
 				this.xLabelAxis = xLabel;
 				this.yLabelAxis = yLabel;
 				this.optionObj = optionObj;
-				this.width = (optionObj.width == undefined) ? (300) : (optionObj.width); // default width is 300
-				this.height = (optionObj.height == undefined) ? (300) : (optionObj.height); // default height is 300
-				this.xTick = (optionObj.xTick == undefined) ? (5) : (optionObj.xTick); //default x tick is 5
-		        this.yTick = (optionObj.yTick == undefined) ? (5) : (optionObj.yTick); //default y tick is 5
-				this.plotXMargin = this.width*0.2; // canvas left, right margin
-				this.plotYMargin = this.height*0.2; // canvas top, bottom margin
-				this.plotLength = this.width*0.02; // margin from plot box
-				this.labelArr = getAxisLabels(dataObj); // for right click menu
-				//for providing drag
+				this.width = (optionObj.width == undefined) ? (300) : (optionObj.width); 
+				this.height = (optionObj.height == undefined) ? (300) : (optionObj.height); 
+				this.xTick = (optionObj.xTick == undefined) ? (5) : (optionObj.xTick); 
+		        this.yTick = (optionObj.yTick == undefined) ? (5) : (optionObj.yTick); 
+				this.plotXMargin = this.width*0.2; 
+				this.plotYMargin = this.height*0.2; 
+				this.plotLength = this.width*0.02; 
+				this.labelArr = getAxisLabels(dataObj); 
 				this.moving = false;
 				this.touch = false;
+				
 				document.getElementById('container'+ containerId).onmousemove = getCoords;
 				document.getElementById('container'+ containerId).onclick = function() {
 			        document.getElementById('regcoords');
 			    };
-			    this.graphObjArr = new Array();
-			    this.dataLayerArr = new Array();
-			    this.hoverArr = new Array();
-			    this.boxSearchArr = new Array();
+			    
+			    this.numberOfGraph = 0;
+                this.graphObjArr = new Array();
+                this.dataLayerArr = new Array();
+                this.hoverArr = new Array();
+                this.boxSearchArr = new Array();
 			},
 			
 			_addLegend: function(dataObj, optionObj) {
 				if(optionObj.legend != undefined && dataObj[optionObj.legend] != undefined){
 					var check = makeLegendLayer(this, dataObj[optionObj.legend], optionObj.position, optionObj.legend);
-					if(check == 1){ // if makeLegendLayer is done right, set the legend for grpahs(scatter, bar, ...)
+					if(check == 1){ 
 						this.legendLabel = optionObj.legend;
 					}else{
 						alert("makeLegendLayer isn't done right");
 					}					
-				}else{
-					// don't draw legend.	
 				}
 			},
 			
 			_build: function(dataObj, xLabel, yLabel, optionObj) {
-				// check if continuous or discrete.
-				// xAxis
-				if(dataObj[xLabel].isDiscrete == undefined){ // continuous
+				if(dataObj[xLabel].isDiscrete == undefined){ 
 					this.isXDiscrete = false;
 					if(dataObj[xLabel].max == undefined){
 						var temp = findMaxMinValue(dataObj[xLabel]);
@@ -66,21 +75,22 @@ var Axis = {};
 						this.xMax = dataObj[xLabel].max;
 			            this.xMin = dataObj[xLabel].min;
 					}
-					//alert(this.xMax + ", " + this.xMin);
-		            // frequency's min value should be 0
+		            
 		            if(xLabel == 'frequency'){
 		            	this.yMin = 0;
 		            }
+					
 					if(optionObj.xbin != undefined){
 						this.xbin = optionObj.xbin;
 						this.xTick = Math.round((this.xMax - this.xMin) / this.xbin);
 					}
+					
 					var tmp = setAxis_continue(this.xMax, this.xMin, this.xTick, this.width);
 					this.xMax = tmp.max;
 					this.xMin = tmp.min;
 					this.xDiff = -1;
 					this.xPlotArr= tmp.plotArr;
-				}else{ // discrete
+				} else { 
 					this.isXDiscrete = true;
 					var tmp = setAxis_discrete(dataObj[xLabel].index, this.width);
 					this.xMax = -1;
@@ -88,49 +98,46 @@ var Axis = {};
 					this.xDiff = tmp.diff;
 					this.xPlotArr = tmp.plotArr;
 				}
-				// yAxis
-				if(dataObj[yLabel].isDiscrete == undefined){ // continuous
+				
+				if(dataObj[yLabel].isDiscrete == undefined) { 
 					this.isYDiscrete = false;
-					if(dataObj[yLabel].max == undefined){
+					if(dataObj[yLabel].max == undefined) {
 						var temp = findMaxMinValue(dataObj[yLabel]);
 						this.yMax = temp.max;
 			            this.yMin = temp.min;
-					}else{
+					} else {
 						this.yMax = dataObj[yLabel].max;
 			            this.yMin = dataObj[yLabel].min;
-					}					
-		            // frequency's min value should be 0
-		            if(yLabel == 'frequency'){
+					}
+		            
+		            if(yLabel == 'frequency') {
 		            	this.yMin = 0;
 		            }
-					if(optionObj.ybin != undefined){
+		            
+					if(optionObj.ybin != undefined) {
 						this.ybin = optionObj.ybin;
 						this.yTick = Math.round((this.yMax - this.yMin) / this.ybin);
 					}
 					this._setYContinuous(this.yMax, this.yMin);
-				}else{ // discrete
+				} else { 
 					this.isYDiscrete = true;
 					this._setYDiscrete(dataObj[yLabel].index);
 				}
-				// set barWidth.
+				
 				if(this.isXDiscrete == true){
 					this.xbarWidth = this.xDiff/2;
 				}else{
 					this.xbarWidth = (this.xPlotArr[1][0] - this.xPlotArr[0][0]) - 3;
 				}
 				
-				// make axis layers.
 				makeXAxisLayer(this);
-				
-				// make tooltip layer.
 				setTooltip(this);
-				// make label layers.
+				
 				if(optionObj.mainLabel != undefined){
 					MakeMainLabelLayer(this, optionObj.mainLabel);
 				}
 				makeXLabelLayer(this, xLabel);
 				makeYLabelLayer(this, yLabel);
-				// make rangeBoxLayer.
 				makeRangeBoxLayer(this);
 			},
 			
@@ -139,7 +146,7 @@ var Axis = {};
 				this.yMax = tmp.max;
 				this.yMin = tmp.min;
 				this.yDiff = -1;
-				this.yPlotArr= tmp.plotArr;
+				this.yPlotArr = tmp.plotArr;
 				makeYAxisLayer(this);
 			},
 			
@@ -153,27 +160,23 @@ var Axis = {};
 			},
 			
 			_draw: function() {
-				
-				// make stage.
 				makeStageLayer(this);
 				this.refresh = makeRefresh(this.stage);
-				// make plotRect.
 				makePlotRectLayer(this);
 				
 				this.plotLayer = new Kinetic.Layer();
-				// add base rectangular.
 				this.plotLayer.add(this.plotRect);				
-				// add x axis layer.
+				
 				for(var i = 0 ; i < this.xLine.length ; i ++){
 					this.plotLayer.add(this.xLine[i]); 
 				    this.plotLayer.add(this.xText[i]);
 				}
-				// add y axis layer.				
+
 				for(var i = 0 ; i < this.yLine.length ; i ++){
 					this.plotLayer.add(this.yLine[i]);
 			        this.plotLayer.add(this.yText[i]);
 				}
-				// add main, x, y label.
+
 				if(this.mainLabel != undefined){
 					this.plotLayer.add(this.mainLabel);
 				}
@@ -181,13 +184,10 @@ var Axis = {};
 				this.plotLayer.add(this.yLabel);
 				
 				this.stage.add(this.plotLayer);
-				// add legend layer.
 				if(this.legendLayer != undefined){
 					this.stage.add(this.legendLayer);
 				}
-				// add rangeBox layer.
 				this.stage.add(this.rangeBoxLayer);
-				// add tooltip layer.
 				this.stage.add(this.tooltipLayer);
 			},
 			
@@ -199,23 +199,21 @@ var Axis = {};
 				this._build(dataObj, xLabelAxis, yLabelAxis, optionObj);
 				makeStageLayer(this);
 				this.refresh = makeRefresh(this.stage);
-				// make plotRect.
 				makePlotRectLayer(this);
 				
 				this.plotLayer = new Kinetic.Layer();
-				// add base rectangular.
 				this.plotLayer.add(this.plotRect);				
-				// add x axis layer.
+				
 				for(var i = 0 ; i < this.xLine.length ; i ++){
 					this.plotLayer.add(this.xLine[i]); 
 				    this.plotLayer.add(this.xText[i]);
 				}
-				// add y axis layer.				
+				
 				for(var i = 0 ; i < this.yLine.length ; i ++){
 					this.plotLayer.add(this.yLine[i]);
 			        this.plotLayer.add(this.yText[i]);
 				}
-				// add main, x, y label.
+
 				if(this.mainLabel != undefined){
 					this.plotLayer.add(this.mainLabel);
 				}
@@ -223,13 +221,12 @@ var Axis = {};
 				this.plotLayer.add(this.yLabel);
 				
 				this.stage.add(this.plotLayer);
-				// add legend layer.
+				
 				if(this.legendLayer != undefined){
 					this.stage.add(this.legendLayer);
 				}
-				// add rangeBox layer.
+				
 				this.stage.add(this.rangeBoxLayer);
-				// add tooltip layer.
 				this.stage.add(this.tooltipLayer);
 				for(var i = 0 ; i < this.graphObjArr.length ; i ++){
 					this.graphObjArr[i]._reDraw(this);
@@ -239,7 +236,6 @@ var Axis = {};
 			_getPixelXY: function(xArr, yArr) {
 				var xPixelArr = new Array();
 				var yPixelArr = new Array();
-				var outNumber = new Array();
 				if(xArr.length == undefined){
 					var temp = new Array();
 					temp[0] = xArr;
@@ -299,7 +295,6 @@ var Axis = {};
 			},
 			_getPixelX: function(xArr) {
 				var xPixelArr = new Array();
-				var outNumber = new Array();
 				if(xArr.length == undefined){
 					var temp = new Array();
 					temp[0] = xArr;
@@ -330,7 +325,6 @@ var Axis = {};
 			},			
 			_getPixelY: function(yArr) {
 				var yPixelArr = new Array();
-				var outNumber = new Array();
 				if(yArr.length == undefined){
 					var temp = new Array();
 					temp[0] = yArr;
@@ -394,21 +388,31 @@ var Axis = {};
 	}
 })();
 
-/**  getAxisLabels  **/
+/**  
+ * @description get axis label naames in data object  
+ * 
+ * @param {object} dataObj all data object to draw graph
+ * 
+ * @returns {array} tmpNameArr array of names in dataObj
+ * 
+ */
 function getAxisLabels(dataObj)
 {
 	var tmpNameArr = new Array();
 	for(var name in dataObj){
-		if(!(name == 'parent' || name == 'child' || name == 'refreshTable' || name == 'labelArr' || name == '_type' || name == 'refreshArr' || name == '$id' || name == '$isSelected' || name == '$isHidden' || name == 'parentTOchild' || name == 'childTOparent' || name == 'updateArr' || name == 'refreshArr')){
+		if(!(name == 'parent' || name == 'child' || name == 'refreshTable' || name == 'labelArr' || name == '_type' || name == 'refreshArr' || name == '$id' || name == '$drawFence' || name == '$isHidden' || name == 'refreshArr')){
 			tmpNameArr.push(name);
 		}
 	}
 	return tmpNameArr;
 }
-/**  getAxisLabels end  **/
 
-/**  set tooltip  **/
-//new kenetic version -> tooltip setting change using tag
+/**  
+ * @description set tooltip layer and options
+ *
+ * @param {object} obj prototype of axis object
+ *  
+ */
 function setTooltip(obj)
 {
 	obj.tooltipLayer = new Kinetic.Layer();			 
@@ -421,7 +425,6 @@ function setTooltip(obj)
 	obj.tooltip.add(new Kinetic.Tag({
 		name: 'tooltip',
 	    fill: 'black',
-	    //pointerDirection: 'down',
 	    pointerWidth: 10,  
 	    pointerHeight: 10, 
 	    lineJoin: 'round',
@@ -440,17 +443,25 @@ function setTooltip(obj)
 	  }));
 	obj.tooltipLayer.add(obj.tooltip);
 }
-/**  set tooltip end  **/ 
 
-/**  set axis  **/
-// set axis with continuous data.
+/**  
+ * @description set axis information about continuous data
+ * 
+ * @param {Number} tempMax max value of x_axis
+ * @param {Number} tempMin min value of x_axis 
+ * @param {Number} tick section count of x_axis
+ * @param {Number} length section length
+ *  
+ * @returns {Object} properties of axis object
+ * 
+ */
 function setAxis_continue(tempMax, tempMin, tick, length)
 {
 	var tickRange = (tempMax - tempMin) / tick;
 	var tmp = Math.ceil(Math.log(tickRange) / Math.log(10));
 	var bin = setTickRange(tmp, tickRange);
-	//check the fixpoint.
 	var fixPoint = 0;
+	
 	if(bin.toString().indexOf('.') != -1){
 		fixPoint = bin.toString().substring(bin.toString().indexOf('.')+1, bin.toString().length).length;
 	}
@@ -475,7 +486,16 @@ function setAxis_continue(tempMax, tempMin, tick, length)
 		'plotArr'	: plotArr
 	};
 }
-// set axis with discrete data.
+
+/**  
+ * @description set axis information about discrete data
+ * 
+ * @param {Number} index levels data to draw x_axis with discrete label
+ * @param {Number} plotLength length of x_axis
+ * 
+ * @returns {Object} properties of axis object
+ * 
+ */
 function setAxis_discrete(index, plotLength)
 {
 	var plotArr = make2DArr(index.length);
@@ -490,8 +510,13 @@ function setAxis_discrete(index, plotLength)
 			'plotArr' : plotArr
 	};
 }
-/**  set axis end  **/
-/**  make rangeBox(drag box)  **/
+
+/**  
+ * @description make box layer
+ * 
+ * @param obj data object to draw graph
+ * 
+ */
 function makeRangeBoxLayer(obj)
 {
 	obj.rangeBox = new Kinetic.Rect({
@@ -507,9 +532,14 @@ function makeRangeBoxLayer(obj)
 	obj.rangeBoxLayer = new Kinetic.Layer();
 	obj.rangeBoxLayer.add(obj.rangeBox);
 }
-/**  make rangeBox(drag box) end  **/
-/**  make stage  **/
-function makeStageLayer(obj)
+
+/**  
+ * @description make graph stage box layer
+ * 
+ * @param obj data object to draw graph
+ * 
+ */
+ function makeStageLayer(obj)
 {
 	var addtionalMargin = 0;
 	if(obj.legendLayer != undefined){
@@ -523,9 +553,14 @@ function makeStageLayer(obj)
 		height: obj.height+obj.plotYMargin*2
 	});
 }
-/**  make stage end  **/
-/**  make plotRect  **/
-function makePlotRectLayer(obj)
+
+/**  
+ * @description make inner graph rectangle layer
+ * 
+ * @param obj data object to draw graph
+ * 
+ */
+ function makePlotRectLayer(obj)
 {
 	obj.plotRect = new Kinetic.Rect({
 		name : "baseRect",
@@ -537,8 +572,14 @@ function makePlotRectLayer(obj)
 		strokeWidth: 2
 	});
 }
-/**  make plotRect end **/
-/**  make Main Label layer  **/
+
+/**  
+ * @description make label rectangle layer
+ * 
+ * @param obj data object to draw graph
+ * @param label label data to add label box
+ * 
+ */
 function MakeMainLabelLayer(obj, label)
 {
 
@@ -554,9 +595,14 @@ function MakeMainLabelLayer(obj, label)
 	   fill: 'black',
 	});
 }
-/**  make Main Label end  **/
-/**  make x, y label layers  **/
-// set xLabel
+
+/**  
+ * @description make label name at x_axis
+ * 
+ * @param obj data object to draw graph
+ * @param label x_axis label data to add 
+ * 
+ */
 function makeXLabelLayer(obj, label)
 {
 	obj.xLabel = new Kinetic.Text({
@@ -571,7 +617,14 @@ function makeXLabelLayer(obj, label)
 	   fill: 'black',
 	});
 }
-// set yLabel
+
+/**  
+ * @description make label name at y_axis
+ * 
+ * @param {Object} obj data object to draw graph
+ * @param label y_axis label data to add 
+ * 
+ */
 function makeYLabelLayer(obj, label)
 {
 	obj.yLabel = new Kinetic.Text({
@@ -584,14 +637,16 @@ function makeYLabelLayer(obj, label)
 		fontStyle: 'bold',
 		fontFamily: 'Calibri',
 		fill: 'black',
-		rotation: (Math.PI)*3/2
+		rotation: 270
 	});
 }
-/**  make x, y label layers end  **/
 
-/**  make axis layers  **/
-// make x axis variables.
-// xPlotArr should be needed.
+/**  
+ * @description make tick name on the graph's x_axis
+ * 
+ * @param {Object} obj data object to draw graph
+ * 
+ */
 function makeXAxisLayer(obj)
 {
 	obj.xLine = new Array();
@@ -632,8 +687,13 @@ function makeXAxisLayer(obj)
 		}
 	}
 }
-// make y axis variables.
-// yPlotArr should be needed.
+
+/**  
+ * @description make tick name on the graph's y_axis
+ * 
+ * @param {Object} obj data object to draw graph
+ * 
+ */
 function makeYAxisLayer(obj)
 {
 	obj.yLine = new Array();
@@ -661,8 +721,7 @@ function makeYAxisLayer(obj)
 	       fill: 'black',
 	       width: 60,
 	       align: 'center',
-	       rotation: (Math.PI)*3/2
+	       rotation: 270
 	   });
 	}
 }
-/**  make axis layers end  **/

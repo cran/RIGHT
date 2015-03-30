@@ -36,27 +36,18 @@ A <- data.frame(ID = 1:10, NAME = letters[1:10])
 B <- data.frame(VALUE = 1:5)
 
 test_that("Check whether data.frame objects are properly saved", {
+
+  prepareData(list(A = A, B = B))
+  expect_true(file.exists(file.path("www", "data.js")))
   
-  fileNameArray <- prepareData(list(A = A, B = B))
-  expect_identical(fileNameArray, c("_A.csv", "_B.csv"))
-  
-  expect_true(file.exists("_A.csv"))
-  expect_identical(A, read.csv("_A.csv"))
-  
-  expect_true(file.exists("_B.csv"))
-  expect_identical(B, read.csv("_B.csv"))
-  
-  unlink(fileNameArray)
-  
+  unlink("www", recursive = TRUE)
 }) # test_that
 
 test_that("Check whether data.frame objects can be saved in another directory", {
   
   dir.create("TEMP")
-  fileNameArray <- prepareData(list(A = A), "TEMP")
-  expect_identical(fileNameArray, "_A.csv")
-  
-  expect_true(file.exists(file.path("TEMP", "_A.csv")))
+  prepareData(list(A = A), "TEMP")  
+  expect_true(file.exists(file.path("TEMP", "www","data.js")))
   
   unlink("TEMP", recursive = TRUE)
   
@@ -71,23 +62,41 @@ setRIGHT(scriptArray = c())
 test_that("Test script generation for loading data", {
   
   loadData("A")
-  expect_identical(get(".RIGHT", envir = asNamespace("RIGHT"))$scriptArray, 
-                   paste0('A = createMainStructure("', file.path("..", "_A.csv"), '");'))
+  expect_identical(get(".RIGHT", envir = asNamespace("RIGHT"))$structArray, 
+                   paste0('var A = createMainStructureE(A);'))
   
   loadData()
-  expect_identical(get(".RIGHT", envir = asNamespace("RIGHT"))$scriptArray, 
-                   paste0('A = createMainStructure("', file.path("..", "_A.csv"), '");'))
+  expect_identical(get(".RIGHT", envir = asNamespace("RIGHT"))$structArray, 
+                   paste0('var A = createMainStructureE(A);'))
   
-  expect_error(loadData(c("B", "C"), "BB.csv"))
+  expect_error(loadData(c("B", "C"), "data.js"))
   
-  loadData(c("B", "C"), c("BB.csv", "CC.csv"))
-  expect_identical(get(".RIGHT", envir = asNamespace("RIGHT"))$scriptArray, 
-                   c(paste0('B = createMainStructure("', file.path("..", "BB.csv"), '");'),
-                     paste0('C = createMainStructure("', file.path("..", "CC.csv"), '");'),
-                     paste0('A = createMainStructure("', file.path("..", "_A.csv"), '");')))
-  
+  loadData(c("B", "C"))
+  expect_identical(get(".RIGHT", envir = asNamespace("RIGHT"))$structArray, 
+                   c("var A = createMainStructureE(A);",
+                     "var B = createMainStructureE(B);",
+                     "var C = createMainStructureE(C);"))      
 }) # test_that
 
+## ---
+## Test addDrawTrigger():
+## ---
+
+setRIGHT(scriptArray = c())
+
+test_that("Test draw trigger script generation", {
+  
+  addDrawTrigger()
+  expect_identical(get(".RIGHT", envir = asNamespace("RIGHT"))$scriptArray, c())
+  
+  addDrawTrigger("A")
+  expect_identical(get(".RIGHT", envir = asNamespace("RIGHT"))$scriptArray, "A.draw();")
+  
+  addDrawTrigger(c("B", "C"))
+  expect_identical(get(".RIGHT", envir = asNamespace("RIGHT"))$scriptArray, 
+                   c("A.draw();", "B.draw();", "C.draw();"))
+  
+})
 ## ---
 ## Test addEventTrigger():
 ## ---
@@ -117,16 +126,37 @@ test_that("Test event trigger script generation", {
 ## Test createDiv():
 ## ---
 
+setRIGHT(structArray = c(),
+         numSearch = 0)
+
 test_that("Test div block generation:", {
   
   expect_identical(createDiv(), NULL)
   expect_identical(createDiv(c()), NULL)
   expect_identical(createDiv(c("A", "B")),
-                   c('<div id="content" class="right-output">',
-                     "  A",
-                     "  B",
-                     "</div>"))
+                   c('<div id="content">', 
+                     '<div id="content1" class="right-output">\nA</div>\n',
+                     '<div id="content2" class="right-output">\nB</div>\n', 
+                     '</div>'))
   
+  setRIGHT(numAxis = 3,
+           offIndex = c(1, 1),
+           offNameArr = c("A", "B"))
+  expect_identical(createDiv(c("div1", "div2", "div3") , TRUE),
+                   c('<div id="content">', 
+                     '<div id="A" class="right-output">\n<div id="B" class="right-output">\n  div1</div>',
+                     '<div id="content2" class="right-output">\n  div2</div>',
+                     '<div id="content3" class="right-output">\n  div3</div>', 
+                     '</div>'))
+  
+  setRIGHT(offIndex = c(1, 3))
+  expect_identical(createDiv(c("div1", "div2", "div3") , TRUE),
+                   c('<div id="content">',
+                     '<div id="A" class="right-output">\n  div1</div>',
+                     '<div id="content2" class="right-output">\n  div2</div>',
+                     '<div id="B" class="right-output">\n  div3</div>', 
+                     '</div>'))
+                   
 }) # test_that
 
 ## ---
@@ -158,25 +188,25 @@ test_that("Check body block generation", {
                    c("<body>",
                      "",
                      '  <div id="footer">',
-                     '  <p id="copyright">&copy; 2013 - <a href="#">The RIGHT team</a></p>',
+                     '  <p id="copyright">&copy; 2014 - <a href="#">The RIGHT team</a></p>',
                      '  <p id="dont-delete-this">E-mail : <a href="mailto:right-user@googlegroups.com">right-user@googlegroups.com</a></p>',
                      "  </div>",
                      "",
                      "</body>"))
   
   setRIGHT(divArray = c("A", "B"),
+           flagServer = FALSE,
            scriptArray = c())
-  
   expect_identical(createBody(),
                    c("<body>",
                      "",
-                     '  <div id="content" class="right-output">',
-                     "    A",
-                     "    B",
+                     '  <div id="content">', 
+                     '  <div id="content1" class="right-output">\nA</div>\n',
+                     '  <div id="content2" class="right-output">\nB</div>\n',
                      "  </div>",
                      "",
                      '  <div id="footer">',
-                     '  <p id="copyright">&copy; 2013 - <a href="#">The RIGHT team</a></p>',
+                     '  <p id="copyright">&copy; 2014 - <a href="#">The RIGHT team</a></p>',
                      '  <p id="dont-delete-this">E-mail : <a href="mailto:right-user@googlegroups.com">right-user@googlegroups.com</a></p>',
                      "  </div>",
                      "",
@@ -184,13 +214,12 @@ test_that("Check body block generation", {
   
   setRIGHT(divArray = c("A", "B"),
            scriptArray = c("C", "D"))
-  
   expect_identical(createBody(),
                    c("<body>",
                      "",
-                     '  <div id="content" class="right-output">',
-                     "    A",
-                     "    B",
+                     '  <div id="content">',
+                     '  <div id="content1" class="right-output">\nA</div>\n',
+                     '  <div id="content2" class="right-output">\nB</div>\n',
                      "  </div>",
                      "",
                      "  <script>",
@@ -199,7 +228,7 @@ test_that("Check body block generation", {
                      "  </script>",
                      "",
                      '  <div id="footer">',
-                     '  <p id="copyright">&copy; 2013 - <a href="#">The RIGHT team</a></p>',
+                     '  <p id="copyright">&copy; 2014 - <a href="#">The RIGHT team</a></p>',
                      '  <p id="dont-delete-this">E-mail : <a href="mailto:right-user@googlegroups.com">right-user@googlegroups.com</a></p>',
                      "  </div>",
                      "",

@@ -11,10 +11,8 @@
 #' 
 #' @export
 #' 
-#' @examples
-#' \donttest{
-#' obj <- RIGHT(boxplot(conc ~ Subject, Theoph))
-#' print(obj)
+#' @examples \dontrun{
+#' RIGHT(boxplot(conc ~ Subject, Theoph))
 #' }
 boxplot_RIGHT <- function(form, data, col = NULL, isString = FALSE) {
 
@@ -26,6 +24,7 @@ boxplot_RIGHT <- function(form, data, col = NULL, isString = FALSE) {
   
   if (!isString) {
     
+    .RIGHT$curDataObj <- argArray$data
     data <- if (is.null(argArray$data)) NULL else as.character(argArray$data)
     
   } # if
@@ -66,7 +65,7 @@ boxplot_RIGHT <- function(form, data, col = NULL, isString = FALSE) {
   .RIGHT$scriptArray <- append(.RIGHT$scriptArray,
                                c(paste0("var boxObj", .RIGHT$numBox,
                                         " = new MakeBoxObj(", data,
-                                        ", '", axisName$x, "', '", axisName$y, "', {});"),
+                                        ", ['", axisName$x, "'], ['", axisName$y, "'], {});"),
                                  paste0("var axis", .RIGHT$numAxis,
                                         " = new Axis(", .RIGHT$numAxis, 
                                         ", boxObj", .RIGHT$numBox, # box object is used to set axis
@@ -77,6 +76,6 @@ boxplot_RIGHT <- function(form, data, col = NULL, isString = FALSE) {
                                         ", ", createObject(baseColor = col, alwaysObject = TRUE), ");")))
   
   # Source box.js in head:
-  addSource(file.path(.RIGHT$libDir_RIGHT, "box.js"))
+  addSource("box.js")
   
 } # function boxplot_RIGHT

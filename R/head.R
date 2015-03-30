@@ -35,14 +35,19 @@ createSource <- function(sourceArray = NULL) {
   # Remove empty strings:
   sourceArray <- sourceArray[sourceArray != ""]
   
+  if(!.RIGHT$flagServer) 
+    sourceArray <- paste(.RIGHT$libDir_RIGHT, sourceArray, sep="/")
+  else
+    sourceArray <- paste("JavaScript/", sourceArray, sep="")
+  
+  sourceArray <- append(sourceArray, "data.js")
+  
   return(paste0('<script src="', sourceArray, '" type="text/javascript"></script>'))
   
 } # createSource
 
 ## ---
 ## Functions to keep track of links:
-##
-## See sourcing functions for comments.
 ## ---
 
 addLink <- function(newLink = NULL) {
@@ -62,17 +67,28 @@ addLink <- function(newLink = NULL) {
 } # function addLink
 
 createLink <- function(linkArray = NULL) {
-  
+    
   if (is.null(linkArray)) {
     return(NULL)
   } # if 
 
   linkArray <- unique(linkArray)
   linkArray <- linkArray[linkArray != ""]
-  
+      
+  if(!.RIGHT$flagServer) {
+    for(iData in 1:length(linkArray)) {
+      if(linkArray[iData] == "theme.css")
+        linkArray[iData] <- linkArray[iData]
+      else
+        linkArray[iData] <- paste(.RIGHT$libDir_RIGHT, linkArray[iData], sep="/")
+    }
+  }
+  else
+    linkArray <- paste("JavaScript/", linkArray, sep="")
+    
   return(paste0('<link rel="stylesheet" type="text/css" href="', linkArray, '"/>'))
   
-} # createSource
+} # createLink
 
 ## ---
 ## Create the head section with a title:
@@ -88,6 +104,10 @@ createHead <- function(title) {
   
   meta <- '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>'
   
+  if(.RIGHT$flagServer) {
+    meta <- c(meta, '  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>')
+  } # if
+  
   # Links and sourced scripts:
   linkArray <- createLink(.RIGHT$linkArray)
   if (!is.null(linkArray)) {
@@ -95,6 +115,7 @@ createHead <- function(title) {
   } # if
   
   sourceArray <- createSource(.RIGHT$sourceArray)
+  
   if (!is.null(sourceArray)) {
     sourceArray <- paste0("  ", sourceArray)
   } # if

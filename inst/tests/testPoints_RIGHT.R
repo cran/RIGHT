@@ -19,7 +19,7 @@ test_that("There should be an axis to use points_RIGHT()", {
   temp <- get(".RIGHT", envir = asNamespace("RIGHT"))
   expect_identical(temp$numPoints, 0)
   expect_identical(temp$nameArray, "dummy")
-  expect_false(any(file.path(temp$libDir_RIGHT, "dot.js") %in% temp$sourceArray))
+  expect_false(any("dot.js" %in% temp$sourceArray))
   
 }) # test_that
 
@@ -31,18 +31,18 @@ test_that("data.frame object should exist", {
   temp <- get(".RIGHT", envir = asNamespace("RIGHT"))
   expect_identical(temp$numPoints, 0)
   expect_identical(temp$nameArray, "dummy")
-  expect_false(any(file.path(temp$libDir_RIGHT, "dot.js") %in% temp$sourceArray))
+  expect_false(any("dot.js" %in% temp$sourceArray))
   
 }) # test_that
 
 test_that("Column names should exist", {
   
-  expect_error(points_RIGHT(conc1 ~ Time, Thoeph))
-  expect_error(points_RIGHT(conc ~ Time1, Thoeph))
+  expect_error(points_RIGHT(conc1 ~ Time, Theoph))
+  expect_error(points_RIGHT(conc ~ Time1, Theoph))
   temp <- get(".RIGHT", envir = asNamespace("RIGHT"))
   expect_identical(temp$numPoints, 0)
   expect_identical(temp$nameArray, "dummy")
-  expect_false(any(file.path(temp$libDir_RIGHT, "dot.js") %in% temp$sourceArray))
+  expect_false(any("dot.js" %in% temp$sourceArray))
   
 }) # test_that
 
@@ -53,7 +53,7 @@ test_that("Check script generation without any options", {
   expect_identical(temp$numPoints, 1)
   expect_identical(temp$nameArray, c("dummy", "Theoph"))
   expect_identical(temp$scriptArray, "var point1 = new Dot(axis1, Theoph, 'Time', 'conc', {});")
-  expect_true(any(file.path(temp$libDir_RIGHT, "dot.js") %in% temp$sourceArray))
+  expect_true(any("dot.js" %in% temp$sourceArray))
   
   points_RIGHT(conc ~ Time, "Theoph")
   temp <- get(".RIGHT", envir = asNamespace("RIGHT"))
@@ -61,7 +61,7 @@ test_that("Check script generation without any options", {
   expect_identical(temp$nameArray, c("dummy", "Theoph", "Theoph"))
   expect_identical(temp$scriptArray, c("var point1 = new Dot(axis1, Theoph, 'Time', 'conc', {});",
                                        "var point2 = new Dot(axis1, Theoph, 'Time', 'conc', {});"))
-  expect_true(any(file.path(temp$libDir_RIGHT, "dot.js") %in% temp$sourceArray))
+  expect_true(any("dot.js" %in% temp$sourceArray))
   
 }) # test_that
 
@@ -84,6 +84,18 @@ test_that("Check script generation without any options", {
 #   
 # }) # test_that
 
+setRIGHT(numPoints = 0,
+         nameArray = c(),
+         sourceArray = c(),
+         scriptArray = c())
+
 test_that("Check isString option:", {
-  # CHECK (junghoon)
-})
+
+  points_RIGHT(conc ~ Time, "Theoph", isString = TRUE)
+  temp <- get(".RIGHT", envir = asNamespace("RIGHT"))
+  expect_identical(temp$numPoints, 1)
+  expect_identical(temp$nameArray, c("Theoph"))
+  expect_identical(temp$scriptArray, "var point1 = new Dot(axis1, Theoph, 'Time', 'conc', {});")
+  expect_true(any("dot.js" %in% temp$sourceArray))
+
+}) # test_that

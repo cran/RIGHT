@@ -10,10 +10,8 @@
 #' 
 #' @export
 #' 
-#' @examples
-#' \donttest{
-#' obj <- RIGHT(pie(Subject, Theoph))
-#' print(obj)
+#' @examples \dontrun{
+#' RIGHT(pie(Subject, Theoph))
 #' }
 pie_RIGHT <- function(x, data, isString = FALSE) {
   
@@ -25,6 +23,7 @@ pie_RIGHT <- function(x, data, isString = FALSE) {
 
   if (!isString) {
     
+    .RIGHT$curDataObj <- argArray$data
     x <- if (is.null(argArray$x)) NULL else as.character(argArray$x)
     data <- if (is.null(argArray$data)) NULL else as.character(argArray$data)
     
@@ -41,7 +40,6 @@ pie_RIGHT <- function(x, data, isString = FALSE) {
   dataArray <- get(data, envir = parent.frame(), inherits = TRUE)
   
   # Check whether the columns exist:
-  # CHECK (junghoon): is there a way to deal with strings? Why is this different from, say, plot_RIGHT()?
   checkColumnName(x, dataArray)
   
   ## ---
@@ -76,6 +74,6 @@ pie_RIGHT <- function(x, data, isString = FALSE) {
                                         ", '", x, "', 'frequency', {});")))
   
   # Source pie.js in head:
-  addSource(file.path(.RIGHT$libDir_RIGHT, "pie.js"))
+  addSource("pie.js")
   
 } # function pie_RIGHT

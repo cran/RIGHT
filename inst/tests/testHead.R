@@ -35,11 +35,14 @@ test_that("Check adding scripts to source", {
 
 test_that("Test script creation with createSource()", {
   
+  setRIGHT(flagServer = FALSE)
+  
   expect_identical(createSource(), NULL)
   expect_identical(createSource(c()), NULL)
   expect_identical(createSource(c("A", "B", "", "A")),
-                   c('<script src="A" type="text/javascript"></script>',
-                     '<script src="B" type="text/javascript"></script>'))
+                   c('<script src="/A" type="text/javascript"></script>',
+                     '<script src="/B" type="text/javascript"></script>',
+                     '<script src="data.js" type="text/javascript"></script>'))
   
 }) # test_that
 
@@ -81,11 +84,13 @@ test_that("Check adding links to source", {
 
 test_that("Test script creation with createLink()", {
   
+  setRIGHT(flagServer = FALSE)
+
   expect_identical(createLink(), NULL)
   expect_identical(createLink(c()), NULL)
   expect_identical(createLink(c("A", "B", "", "A")),
-                   c('<link rel="stylesheet" type="text/css" href="A"/>',
-                     '<link rel="stylesheet" type="text/css" href="B"/>'))
+                   c('<link rel="stylesheet" type="text/css" href="/A"/>',
+                     '<link rel="stylesheet" type="text/css" href="/B"/>'))
   
 }) # test_that
 
@@ -103,7 +108,7 @@ test_that("Test script creation with createHead()", {
                      "",
                      '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
                      "",
-                     "  <title>NOTHING &amp; EMPTY</title>", 
+                     "  <title>NOTHING &amp; EMPTY</title>",
                      "",
                      "</head>"))
   
@@ -115,7 +120,7 @@ test_that("Test script creation with createHead()", {
                      "",
                      '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
                      "",
-                     '  <link rel="stylesheet" type="text/css" href="right.css"/>',
+                     '  <link rel="stylesheet" type="text/css" href="/right.css"/>',
                      "",
                      "  <title>LINK&lt; GIVEN</title>", 
                      "",
@@ -129,11 +134,12 @@ test_that("Test script creation with createHead()", {
                      "",
                      '  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
                      "",
-                     '  <link rel="stylesheet" type="text/css" href="right.css"/>',
+                     '  <link rel="stylesheet" type="text/css" href="/right.css"/>',
                      "",
                      "  <title>BOTH GIVEN</title>", 
                      "",
-                     '  <script src="common.js" type="text/javascript"></script>',
+                     '  <script src="/common.js" type="text/javascript"></script>',
+                     '  <script src="data.js" type="text/javascript"></script>',
                      "",
                      "</head>"))
   

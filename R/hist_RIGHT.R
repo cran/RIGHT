@@ -10,10 +10,8 @@
 #' @seealso \code{\link{hist}}
 #' @export
 #' 
-#' @examples
-#' \donttest{
-#' obj <- RIGHT(hist(Time, Theoph, color = Subject))
-#' print(obj)
+#' @examples \dontrun{
+#' RIGHT(hist(Time, Theoph, color = Subject))
 #' }
 hist_RIGHT <- function(x, data, color = NULL, isString = FALSE) {
   
@@ -25,6 +23,7 @@ hist_RIGHT <- function(x, data, color = NULL, isString = FALSE) {
   
   if (!isString) {
     
+    .RIGHT$curDataObj <- argArray$data
     x <- if (is.null(argArray$x)) NULL else as.character(argArray$x)
     data <- if (is.null(argArray$data)) NULL else as.character(argArray$data)
     color <- if (is.null(argArray$color)) NULL else as.character(argArray$color)
@@ -42,7 +41,6 @@ hist_RIGHT <- function(x, data, color = NULL, isString = FALSE) {
   dataArray <- get(data, envir = parent.frame(), inherits = TRUE)
   
   # Check whether the columns exist:
-  # CHECK (junghoon): is there a way to deal with strings? Why is this different from, say, plot_RIGHT()?
   checkColumnName(x, dataArray)
 
   # Check color option:
@@ -80,6 +78,6 @@ hist_RIGHT <- function(x, data, color = NULL, isString = FALSE) {
                                         ", '", x, "', 'frequency', {});")))
   
   # Source bar.js in head:
-  addSource(file.path(.RIGHT$libDir_RIGHT, "bar.js"))
+  addSource("bar.js")
   
 } # function hist_RIGHT

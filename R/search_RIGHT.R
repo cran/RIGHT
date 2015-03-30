@@ -7,11 +7,9 @@
 #' 
 #' @export
 #' 
-#' @examples
-#' \donttest{
-#' obj <- RIGHT({plot(conc ~ Time, Theoph, type = "p", color = Subject)
-#'               search(Theoph)})
-#' print(obj)
+#' @examples \dontrun{
+#' RIGHT({plot(conc ~ Time, Theoph, type = "p", color = Subject)
+#'        search(Theoph)})
 #' }
 search_RIGHT <- function(data, isString = FALSE) {
   
@@ -48,14 +46,12 @@ search_RIGHT <- function(data, isString = FALSE) {
   .RIGHT$numSearch <- .RIGHT$numSearch + 1
   
   # Add div in body: note that <script> is inserted under <div>.
-  # CHECK (junghoon): this has to be improved such that the layout is controlled in <div> and the
-  #                   actual JavaScript code appears in <script>.
-  .RIGHT$scriptArray <- append(.RIGHT$scriptArray, 
+  .RIGHT$searchArray <- append(.RIGHT$searchArray, 
                                paste0('makeSearchButton("searchBox', .RIGHT$numSearch,
                                       '", ', data, ');'))
   
   # Source dot.js in head:
-  addSource(file.path(.RIGHT$libDir_RIGHT, "search.js"))
+  addSource("search.js")
   
   invisible()
   

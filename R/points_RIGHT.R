@@ -10,11 +10,9 @@
 #' 
 #' @export
 #' 
-#' @examples
-#' \donttest{
-#' obj <- RIGHT({plot(conc ~ Time, Theoph, type = "n") # create blank axis
-#'               points(conc ~ Time, Theoph)})
-#' print(obj)
+#' @examples \dontrun{
+#' RIGHT({plot(conc ~ Time, Theoph, type = "n")
+#'        points(conc ~ Time, Theoph)})
 #' }
 points_RIGHT <- function(form, data, isString = FALSE) {
   
@@ -55,6 +53,7 @@ points_RIGHT <- function(form, data, isString = FALSE) {
   checkColumnName(axisName$y, dataArray)
   
   # Check col option:
+ 
   checkCol(col)
   col <- getRGB(col)
   
@@ -77,8 +76,8 @@ points_RIGHT <- function(form, data, isString = FALSE) {
                                       createObject(baseColor = col, alwaysObject = TRUE) ,");"))
   
   # Source dot.js in head:
-  addSource(file.path(.RIGHT$libDir_RIGHT, "dot.js"))
+  addSource("dot.js")
   
   invisible()
   
-} # function point_RIGHT
+} # function points_RIGHT

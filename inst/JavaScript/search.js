@@ -1,29 +1,27 @@
+
+/**
+ * @fileOverview operate to make search box
+ */
+ 
+ /**  
+ * @description make sesarch box on the browser
+ * 
+ * @param searchBoxIdString
+ * @param mainArr data object which want to search a data using search box
+ * 
+ * @ignore
+ * 
+ */
 function makeSearchButton(searchBoxIdString, mainArr)
 {
-	//get searchBoxId from string
-	var searchBoxId=searchBoxIdString.slice(9);
-	
+	var searchBoxId = searchBoxIdString.slice(9);
 	// to access mainArr from booleanSearch function later
 	window["mainArrOfSearch"+searchBoxId] = mainArr;
 	// make form 
 	document.write("<div class=\"search_wrap\"><form id=\"searchForm");
 	document.write(searchBoxId);
 	document.write("\">");
-	
-/*	// variable buttons update (omit this label because of auto-compelte function)
-	for(var i = 0; i < mainArr.labelArr.length ; i ++){
-		document.write("<a id=\"labelArr[");
-		document.write(i);
-		document.write("]\" href=\"#\" class=\"variableButton\" onclick=\"addValueToSearchBox(");
-		document.write(searchBoxId);
-		document.write(", '");
-		document.write(mainArr.labelArr[i]);
-		document.write("'); return false;\">");
-		document.write(mainArr.labelArr[i]);
-		document.write("</a>");	  
-	}
-	document.write("<br>");
-*/	
+
 	// make answer button
 	document.write("<a id=\"ansId\" href=\"#\" class=\"ansButton\" onclick=\"addAnsToSearchBox(");
 	document.write(searchBoxId);
@@ -99,30 +97,50 @@ function makeSearchButton(searchBoxIdString, mainArr)
 	document.write(");</script>");
 }
 
+/**  
+ * @description clear all values on the search box
+ * 
+ * @param searchBoxId identical number that assigned for each search box
+ * 
+ */
 function clearSearchBox(searchBoxId)
 {
 	var textBox = document.getElementById("searchBox"+searchBoxId);
 	textBox.value = '';	
 }
-/*//(omit this label because of auto-compelte function)
-function addValueToSearchBox(searchBoxId, label)
-{
-    var textBox = document.getElementById("searchBox"+searchBoxId);
-    textBox.value = textBox.value + label;
-}
-*/
+
+/**  
+ * @description clear ans value
+ * 
+ * @param searchBoxId identical number that assigned for each search box
+ * @param mainArr data object which want to search a data using search box
+ * 
+ */
 function printClearAns(searchBoxId, mainArr)
 {
 	mainArr.$ans = "undefined";
 	document.getElementById('label'+searchBoxId).innerHTML = "undefined";
 }
 
+/**  
+ * @description add ans condition value on the search box
+ * 
+ * @param searchBoxId identical number that assigned for each search box
+ * 
+ */
 function addAnsToSearchBox(searchBoxId)
 {
     var textBox = document.getElementById("searchBox"+searchBoxId);
     textBox.value = textBox.value + "[ans]";
 }
 
+/**  
+ * @description save ans to ansShow in order to show it in label
+ * 
+ * @param searchBoxId identical number that assigned for each search box
+ * @param mainArr data object which want to search a data using search box
+ * 
+ */
 function printAns(searchBoxId, mainArr)
 {
 	// save ans to ansShow in order to show it in label
@@ -149,6 +167,13 @@ function printAns(searchBoxId, mainArr)
 	}
 }
 
+/**  
+ * @description find values which matched with boolean condition
+ * 
+ * @param searchBoxId identical number that assigned for each search box
+ * @param mainArr data object which want to search a data using search box
+ * 
+ */
 function booleanSearch(searchBoxId, mainArr)
 {
 	var searchIdString = "searchId" + searchBoxId;
@@ -185,53 +210,42 @@ function booleanSearch(searchBoxId, mainArr)
 	
 	//current answer update.
 	mainArr.$ans=inputStr; 
-	
 	// find node number which satisfies boolean condition
+	var temp = new Array(mainArr.$isSelected.length);
 	for(var i = 0 ; i < mainArr.$isSelected.length ; i ++)
 	{	
+		temp[i] = 0;
 		if(eval(inputStr)){			
 			findingNumber.push(i);
 		}
 	}
-	
-	// root update
-	for(var i = 0 ; i < mainArr.$isSelected.length ; i ++){
-		mainArr.$isSelected[i][0] = 0;
-		for(var j = 1 ; j < mainArr.$isSelected[i].length ; j ++){
-			mainArr.$isSelected[i][j](0);
-		}
-	}
+
 	for(var i = 0 ; i < findingNumber.length ; i ++){
-		mainArr.$isSelected[findingNumber[i]][0] = 1;
-		for(var j = 1 ; j < mainArr.$isSelected[findingNumber[i]].length ; j ++){
-			mainArr.$isSelected[findingNumber[i]][j](1);
-		}
+		temp[findingNumber[i]] = 1;
 	}
-	// table update
-	if(mainArr.refreshTable != undefined){
-		mainArr.refreshTable();
-	}
-	// refresh
-	for(var i = 1 ; i < mainArr.refreshArr.length ; i ++){
-		mainArr.refreshArr[i]();
-	}
-	// mainArr update
-	if(mainArr.child != null){
-		for(var i = 0 ; i < mainArr.child.length ; i ++){
-			var temp = mainArr.parentTOchild[i](findingNumber);
-			childUpdate(mainArr.child[i], temp, 1, mainArr);
-		}
-	}	
+	
+	updateRecursive(mainArr, temp, mainArr.$isSelected);
 }
 
-// replace all string
+/**  
+ * @description replace all string
+ * 
+ * @param str
+ * @param originalStr 
+ * @param replacedStr 
+ * 
+ * @ignore
+ */
 function replaceAll(str, orginalStr, replacedStr){
 	return str.split(orginalStr).join(replacedStr);
 }
 
+/**
+ * @ignore
+ */
 //auto complete (Reference, http://jqueryui.com/autocomplete/#multiple)
 function autoComplete(searchBoxId, mainArr){
-	$(function(){
+	(function(){
 	    var availableTags = mainArr.labelArr;
 	    function split( val ) {
 	        return val.split( / \s*/ );
@@ -241,36 +255,34 @@ function autoComplete(searchBoxId, mainArr){
 	    }
 	    $( "#searchBox"+searchBoxId )
 	    	// don't navigate away from the field on tab when selecting an item
-	        .bind( "keydown", function( event ) {
-	          if ( event.keyCode === $.ui.keyCode.TAB &&
-	              $( this ).data( "ui-autocomplete" ).menu.active ) {
-	            event.preventDefault();
-	          }
-	        })
-	        .autocomplete({
-	          minLength: 0,
-	          source: function( request, response ) {
-	            // delegate back to autocomplete, but extract the last term
-	            response( $.ui.autocomplete.filter(
-	              availableTags, extractLast( request.term ) ) );
-	          },
-	          focus: function() {
-	            // prevent value inserted on focus
-	            return false;
-	          },
-	          select: function( event, ui ) {
-	            var terms = split( this.value );
-	            // remove the current input
-	            terms.pop();
-	            // add the selected item
-	            terms.push( ui.item.value );
-	            // add placeholder to get the comma-and-space at the end
-	            terms.push( "" );
-	            this.value = terms.join( " " );
-	            return false;
-	          }
-	        });
+		.bind( "keydown", function( event ) {
+		  if ( event.keyCode === $.ui.keyCode.TAB &&
+			  $( this ).data( "ui-autocomplete" ).menu.active ) {
+			event.preventDefault();
+		  }
+		})
+		.autocomplete({
+			minLength: 0,
+			source: function( request, response ) {
+			// delegate back to autocomplete, but extract the last term
+			response( $.ui.autocomplete.filter(
+			  availableTags, extractLast( request.term ) ) );
+			},
+			focus: function() {
+			// prevent value inserted on focus
+			return false;
+			},
+			select: function( event, ui ) {
+				var terms = split( this.value );
+				// remove the current input
+				terms.pop();
+				// add the selected item
+				terms.push( ui.item.value );
+				// add placeholder to get the comma-and-space at the end
+				terms.push( "" );
+				this.value = terms.join( " " );
+				return false;
+			}
+		});
 	});	
-
 }
-
